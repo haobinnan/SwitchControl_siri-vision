@@ -9,13 +9,8 @@ from lxml import etree
 MyHelp = "Usage:\n	IP\n	User\n	Password\n	ShowAllPort , ShowPortState , SetPortState\n	PortNumber(1,2,3,....)\n	State(0,1)"
 
 
-def SetPort(IP, User, Password, i, iState):
-    data = {'portid':(i-1), 'state':iState, 'speed_duplex':'0', 'flow':'0', 'submit':'+++%D3%A6%D3%C3+++', 'cmd':'port'}
-    requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
-
-def Fun_GetPortState(IP, User, Password, i):
+def Fun_GetItem(IP, User, Password, i):
     htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
-#    print (htmldata.text)
     html = etree.HTML(htmldata.text)
     result = html.xpath('//table')
     tabledata = etree.tostring(result[1], encoding='utf-8').decode()
@@ -25,7 +20,53 @@ def Fun_GetPortState(IP, User, Password, i):
         r = row.xpath('.//td/text()')
         strPort = "Port %d" % i
         if r[0] == strPort:
-            return r[1]
+            return r
+
+def GetValue(HtmlData, SelectName, Text):
+    htmldata = etree.fromstring(HtmlData)
+    select = htmldata.xpath('//select[@name=\'' + SelectName  + '\']//option')
+
+    for row in select:
+        if row.text.find(Text) != -1:
+            return int(row.get('value'))
+
+def NameConvert_speed_duplex(name):
+    if (name == "10 Half"):
+        return "10M/半双工"
+    elif (name == "10 Full"):
+        return "10M/全双工"
+    elif (name == "100 Half"):
+        return "100M/半双工"
+    elif (name == "100 Full"):
+        return "100M/全双工"
+    else:
+        return name
+
+def NameConvert_flow(name):
+    if (name == "启动"):
+        return "开启"
+    else:
+        return name
+
+def SetPort(IP, User, Password, i, iState):
+    r = Fun_GetItem(IP, User, Password, i)
+    if (r):
+        htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+        html = etree.HTML(htmldata.text)
+        result = html.xpath('//table')
+        tabledata = etree.tostring(result[0], encoding='utf-8').decode()
+
+        portid = GetValue(tabledata, 'portid', r[0])
+        speed_duplex = GetValue(tabledata, 'speed_duplex', NameConvert_speed_duplex(r[2]))
+        flow = GetValue(tabledata, 'flow', NameConvert_flow(r[4]))
+
+        data = {'portid':portid, 'state':iState, 'speed_duplex':speed_duplex, 'flow':flow, 'submit':'+++%D3%A6%D3%C3+++', 'cmd':'port'}
+        requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
+
+def Fun_GetPortState(IP, User, Password, i):
+    r = Fun_GetItem(IP, User, Password, i)
+    if (r):
+        return r[1]
 
 def Fun_ListPortState(IP, User, Password):
     htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
