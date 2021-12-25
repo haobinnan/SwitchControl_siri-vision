@@ -6,20 +6,15 @@ import sys
 from lxml import etree
 
 
-g_URL = 'http://192.168.1.3/'
-g_User = "admin"
-g_Password = "*******************"
+MyHelp = "Usage:\n	IP\n	User\n	Password\n	ShowAllPort , ShowPortState , SetPortState\n	PortNumber(1,2,3,....)\n	State(0,1)"
 
 
-MyHelp = "Usage: [ ShowAllPort | ShowPortState, PortNumber(1,2,3,....) | SetPortState, PortNumber(1,2,3,....), State(0,1) ]"
-
-
-def SetPort(i, iState):
+def SetPort(IP, User, Password, i, iState):
     data = {'portid':(i-1), 'state':iState, 'speed_duplex':'0', 'flow':'0', 'submit':'+++%D3%A6%D3%C3+++', 'cmd':'port'}
-    requests.post(g_URL + 'port.cgi', data, auth=(g_User,g_Password))
+    requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
 
-def Fun_GetPortState(i):
-    htmldata = requests.get(g_URL + 'port.cgi', auth=(g_User,g_Password))
+def Fun_GetPortState(IP, User, Password, i):
+    htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
 #    print (htmldata.text)
     html = etree.HTML(htmldata.text)
     result = html.xpath('//table')
@@ -32,8 +27,8 @@ def Fun_GetPortState(i):
         if r[0] == strPort:
             return r[1]
 
-def Fun_ListPortState():
-    htmldata = requests.get(g_URL + 'port.cgi', auth=(g_User,g_Password))
+def Fun_ListPortState(IP, User, Password):
+    htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
     html = etree.HTML(htmldata.text)
     result = html.xpath('//table')
     tabledata = etree.tostring(result[1], encoding='utf-8').decode()
@@ -45,15 +40,16 @@ def Fun_ListPortState():
 
 
 if __name__ == '__main__':
-    if (len(sys.argv) == 1):
+    if (len(sys.argv) < 5):
         print (MyHelp)
         exit()
 
-    if (sys.argv[1] == "ShowAllPort"):
-        Fun_ListPortState()
-    elif (sys.argv[1] == "ShowPortState"):
-        print (Fun_GetPortState(int(sys.argv[2])))
-    elif (sys.argv[1] == "SetPortState"):
-        SetPort(int(sys.argv[2]), int(sys.argv[3]))
+    if (sys.argv[4] == "ShowAllPort"):
+        Fun_ListPortState(sys.argv[1], sys.argv[2], sys.argv[3])
+    elif (sys.argv[4] == "ShowPortState"):
+        print (Fun_GetPortState(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5])))
+    elif (sys.argv[4] == "SetPortState"):
+        SetPort(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5]), int(sys.argv[6]))
     else:
         print (MyHelp)
+
