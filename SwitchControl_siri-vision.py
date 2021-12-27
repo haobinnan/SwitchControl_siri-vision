@@ -77,10 +77,9 @@ if __name__ == '__main__':
 
     if (sys.argv[4] == "ShowAllPort"):
         Fun_ListPortState(sys.argv[1], sys.argv[2], sys.argv[3])
-    elif (sys.argv[4] == "ShowPortState"):
+    elif (sys.argv[4] == "ShowPortState" and len(sys.argv) >= 6):
         print (Fun_GetPortState(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5])))
-    elif (sys.argv[4] == "SetPortState"):
+    elif (sys.argv[4] == "SetPortState" and len(sys.argv) >= 7):
         Fun_SetPort(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5]), int(sys.argv[6]))
     else:
         print (MyHelp)
-
