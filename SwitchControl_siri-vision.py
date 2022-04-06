@@ -54,7 +54,13 @@ def Fun_SetPort(IP, User, Password, i, iState):
         flow = Fun_GetValue(table[0], 'flow', Fun_NameConvert_flow(r[4].text))
 
         data = {'portid':portid, 'state':iState, 'speed_duplex':speed_duplex, 'flow':flow, 'submit':'+++%D3%A6%D3%C3+++', 'cmd':'port'}
-        requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
+        htmldata = requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
+        html = etree.HTML(htmldata.text)
+
+        for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
+            td = row.xpath('.//td/text()')
+            if td[0] == "Port %d" % i:
+                return row[1].text
 
 def Fun_GetPortState(IP, User, Password, i):
     r = Fun_GetItem(IP, User, Password, i)
@@ -80,6 +86,6 @@ if __name__ == '__main__':
     elif (sys.argv[4] == "ShowPortState" and len(sys.argv) >= 6):
         print (Fun_GetPortState(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5])))
     elif (sys.argv[4] == "SetPortState" and len(sys.argv) >= 7):
-        Fun_SetPort(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5]), int(sys.argv[6]))
+        print (Fun_SetPort(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5]), int(sys.argv[6])))
     else:
         print (MyHelp)
