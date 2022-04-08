@@ -10,7 +10,11 @@ MyHelp = "Usage:\n	IP\n	User\n	Password\n	ShowAllPort , ShowPortState , SetPortS
 
 
 def Fun_GetItem(IP, User, Password, i):
-    htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+    try:
+        htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+    except:
+        print ("Error: \"requests.get\" Line:", sys._getframe().f_lineno)
+        exit()
     html = etree.HTML(htmldata.text)
 
     for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
@@ -45,7 +49,11 @@ def Fun_NameConvert_flow(name):
 def Fun_SetPort(IP, User, Password, i, iState):
     r = Fun_GetItem(IP, User, Password, i)
     if r is not None:
-        htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+        try:
+            htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+        except:
+            print ("Error: \"requests.get\" Line:", sys._getframe().f_lineno)
+            exit()
         html = etree.HTML(htmldata.text)
         table = html.xpath('//table')
 
@@ -54,7 +62,11 @@ def Fun_SetPort(IP, User, Password, i, iState):
         flow = Fun_GetValue(table[0], 'flow', Fun_NameConvert_flow(r[4].text))
 
         data = {'portid':portid, 'state':iState, 'speed_duplex':speed_duplex, 'flow':flow, 'submit':'+++%D3%A6%D3%C3+++', 'cmd':'port'}
-        htmldata = requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
+        try:
+            htmldata = requests.post('http://' + IP + '/port.cgi', data, auth=(User, Password))
+        except:
+            print ("Error: \"requests.get\" Line:", sys._getframe().f_lineno)
+            exit()
         html = etree.HTML(htmldata.text)
 
         for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
@@ -68,7 +80,11 @@ def Fun_GetPortState(IP, User, Password, i):
         return r[1].text
 
 def Fun_ListPortState(IP, User, Password):
-    htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+    try:
+        htmldata = requests.get('http://' + IP + '/port.cgi', auth=(User, Password))
+    except:
+        print ("Error: \"requests.get\" Line:", sys._getframe().f_lineno)
+        exit()
     html = etree.HTML(htmldata.text)
 
     for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
