@@ -19,8 +19,9 @@ def Fun_GetItem(IP, User, Password, i):
 
     for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
         td = row.xpath('.//td/text()')
-        if td[0] == "Port %d" % i:
-            return row
+        if len(td):
+            if td[0] == "Port %d" % i:
+                return td
 
 def Fun_GetValue(Obj, SelectName, Text):
     select = Obj.xpath('//select[@name=\'' + SelectName  + '\']//option')
@@ -57,9 +58,9 @@ def Fun_SetPort(IP, User, Password, i, iState):
         html = etree.HTML(htmldata.text)
         table = html.xpath('//table')
 
-        portid = Fun_GetValue(table[0], 'portid', r[0].text)
-        speed_duplex = Fun_GetValue(table[0], 'speed_duplex', Fun_NameConvert_speed_duplex(r[2].text))
-        flow = Fun_GetValue(table[0], 'flow', Fun_NameConvert_flow(r[4].text))
+        portid = Fun_GetValue(table[0], 'portid', r[0])
+        speed_duplex = Fun_GetValue(table[0], 'speed_duplex', Fun_NameConvert_speed_duplex(r[2]))
+        flow = Fun_GetValue(table[0], 'flow', Fun_NameConvert_flow(r[4]))
 
         data = {'portid':portid, 'state':iState, 'speed_duplex':speed_duplex, 'flow':flow, 'submit':'+++%D3%A6%D3%C3+++', 'cmd':'port'}
         try:
@@ -71,13 +72,14 @@ def Fun_SetPort(IP, User, Password, i, iState):
 
         for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
             td = row.xpath('.//td/text()')
-            if td[0] == "Port %d" % i:
-                return row[1].text
+            if len(td):
+                if td[0] == "Port %d" % i:
+                    return td[1]
 
 def Fun_GetPortState(IP, User, Password, i):
     r = Fun_GetItem(IP, User, Password, i)
     if r is not None:
-        return r[1].text
+        return r[1]
 
 def Fun_ListPortState(IP, User, Password):
     try:
@@ -89,7 +91,8 @@ def Fun_ListPortState(IP, User, Password):
 
     for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
         td = row.xpath('.//td/text()')
-        print ("端口：", td[0], "状态: ", td[1])
+        if len(td):
+            print ("端口：", td[0], "状态: ", td[1])
 
 
 if __name__ == '__main__':
@@ -105,3 +108,4 @@ if __name__ == '__main__':
         print (Fun_SetPort(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[5]), int(sys.argv[6])))
     else:
         print (MyHelp)
+
