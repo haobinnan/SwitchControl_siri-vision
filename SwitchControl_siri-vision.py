@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
 import requests
 import sys
 from lxml import etree
+
+g_bLoadPrettyTable = False
+try:
+    from prettytable import PrettyTable
+    g_bLoadPrettyTable = True
+except Exception:
+    pass
 
 
 MyHelp = 'Usage:\n\
     参数1: IP\n\
     参数2: User\n\
     参数3: Password\n\
-    参数4: ShowSystemInfo, Reboot, Save, ShowAllPort, ShowPortState, SetPortState\n\
+    参数4: ShowSystemInfo, PortStatistics, Reboot, Save, ShowAllPort, ShowPortState, SetPortState\n\
     参数5(结合参数4，某些方法不实用。): PortNumber(1,2,3,....)\n\
     参数6(结合参数4，某些方法不实用。): State(0,1)'
 
@@ -123,6 +131,15 @@ def Fun_GetPortState(IP, User, Password, i):
         return r[1]
 
 
+def Fun_PortFilter(HTML_TD_DataList):
+    r = True
+    for i in HTML_TD_DataList:
+        if len(i.strip()) == 0:
+            r = False
+            break
+    return r
+
+
 def Fun_ListPortState(IP, User, Password):
     try:
         htmldata = requests.get(
@@ -132,13 +149,21 @@ def Fun_ListPortState(IP, User, Password):
         exit()
     html = etree.HTML(htmldata.content.decode(htmldata.apparent_encoding))
 
+    if g_bLoadPrettyTable is True:
+        table = PrettyTable()
+        table.field_names = ['端口', '状态']
     for row in html.xpath('//table[1]')[0].xpath('//tr')[4:]:
         td = row.xpath('.//td/text()')
-        if len(td):
-            print('端口：', td[0], '状态: ', td[1])
+        if len(td) and Fun_PortFilter(td) is True:
+            if g_bLoadPrettyTable is True:
+                table.add_row(td[:2])
+            else:
+                print('端口:', td[0], ' 状态:', td[1])
+    if g_bLoadPrettyTable is True:
+        print(table)
 
 
-def Fun_ShowSystemInfo(IP, User, Password):
+def Fun_ShowSystemInfo_Base(IP, User, Password):
     try:
         htmldata = requests.get(
             'http://' + IP + '/info.cgi', auth=(User, Password))
@@ -147,10 +172,27 @@ def Fun_ShowSystemInfo(IP, User, Password):
         exit()
     html = etree.HTML(htmldata.content.decode(htmldata.apparent_encoding))
 
+    RetArray = []
     for row in html.xpath('//table[1]')[0].xpath('//tr'):
         rowTextData = row.xpath('.//th/text()|.//td/text()')
-        if len(rowTextData):
-            print(rowTextData)
+        if len(rowTextData) == 2:
+            RetArray.append(rowTextData)
+    return RetArray
+
+
+def Fun_ShowSystemInfo(IP, User, Password):
+    SystemInfo = Fun_ShowSystemInfo_Base(IP, User, Password)
+
+    if g_bLoadPrettyTable is True:
+        table = PrettyTable()
+        table.header = False
+    for row in SystemInfo:
+        if g_bLoadPrettyTable is True:
+            table.add_row(row)
+        else:
+            print(row)
+    if g_bLoadPrettyTable is True:
+        print(table)
 
 
 def Fun_Reboot(IP, User, Password):
@@ -183,6 +225,33 @@ def Fun_Save(IP, User, Password):
         print(strRet[0])
 
 
+def Fun_PortStatistics(IP, User, Password):
+    try:
+        htmldata = requests.get(
+            'http://' + IP + '/port.cgi?page=stats', auth=(User, Password))
+    except Exception:
+        print('Error: "requests.get" Line:', sys._getframe().f_lineno)
+        exit()
+    html = etree.HTML(htmldata.content.decode(htmldata.apparent_encoding))
+
+    if g_bLoadPrettyTable is True:
+        table = PrettyTable()
+    index = 0
+    for row in html.xpath('//table[1]')[0].xpath('//tr'):
+        rowTextData = row.xpath('.//th/text()|.//td/text()')
+        if len(rowTextData) > 1:
+            if g_bLoadPrettyTable is True:
+                if index == 0:
+                    table.field_names = rowTextData
+                else:
+                    table.add_row(rowTextData)
+            else:
+                print(rowTextData)
+            index += 1
+    if g_bLoadPrettyTable is True:
+        print(table)
+
+
 if __name__ == '__main__':
     if (len(sys.argv) < 5):
         print(MyHelp)
@@ -198,6 +267,8 @@ if __name__ == '__main__':
             sys.argv[5]), int(sys.argv[6])))
     elif (sys.argv[4] == 'ShowSystemInfo'):
         Fun_ShowSystemInfo(sys.argv[1], sys.argv[2], sys.argv[3])
+    elif (sys.argv[4] == 'PortStatistics'):
+        Fun_PortStatistics(sys.argv[1], sys.argv[2], sys.argv[3])
     elif (sys.argv[4] == 'Reboot'):
         Fun_Reboot(sys.argv[1], sys.argv[2], sys.argv[3])
     elif (sys.argv[4] == 'Save'):

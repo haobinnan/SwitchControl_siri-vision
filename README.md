@@ -11,24 +11,24 @@
 
 4. **ShowAllPort** 查看所有端口状态
 
-5. **ShowPortState** 查看指定端口状态
+5. **PortStatistics** 查看端口统计信息
+
+6. **ShowPortState** 查看指定端口状态
 
     参数：**PortNumber** (1,2,3,....) 端口号
 
-6. **SetPortState** 设置指定端口状态
+7. **SetPortState** 设置指定端口状态
 
     参数：**PortNumber** (1,2,3,....) 端口号 | **State** (0,1) 端口状态 【0：禁止 1：开启】
 
-7. **ShowSystemInfo** 查看系统信息
+8. **ShowSystemInfo** 查看系统信息
 
-8. **Reboot** 重启交换机
+9. **Reboot** 重启交换机
 
-9. **Save** 保存交换机配置
+10. **Save** 保存交换机配置
 
 
 
 
 
 目前对SR_8808MNB_8G（千兆版）、及2.5G交换机型号进行过测试。
-
-推荐淘宝店铺：https://xilitongxun.taobao.com/
