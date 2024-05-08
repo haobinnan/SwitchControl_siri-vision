@@ -46,7 +46,7 @@ def Fun_GetValue(Obj, SelectName, Text):
             return int(row.get('value'))
 
 
-def Fun_NameConvert_speed_duplex(name):
+def Fun_NameConvert_speed_duplex(name, SystemInfo):
     if (name == '10 Half'):
         return '10M/半双工'
     elif (name == '10 Full'):
@@ -56,6 +56,10 @@ def Fun_NameConvert_speed_duplex(name):
     elif (name == '100 Full'):
         return '100M/全双工'
     elif (name == '自动'):
+        for row in SystemInfo:
+            if row[0].strip() == '硬件型号' and \
+                    row[1].strip() == 'SR_8808MNB_8G_WEB_SMART_SWITCH':
+                return name
         return 'Auto'
     elif (name == '10 Half'):
         return '10M/Half'
@@ -94,12 +98,20 @@ def Fun_SetPort(IP, User, Password, i, iState):
         html = etree.HTML(htmldata.content.decode(htmldata.apparent_encoding))
         table = html.xpath('//table')
 
+        SystemInfo = Fun_ShowSystemInfo_Base(IP, User, Password)
+
         portid = Fun_GetValue(table[0], 'portid', r[0])
         speed_duplex = Fun_GetValue(
-            table[0], 'speed_duplex', Fun_NameConvert_speed_duplex(r[2]))
+            table[0],
+            'speed_duplex',
+            Fun_NameConvert_speed_duplex(r[2], SystemInfo))
         flow = Fun_GetValue(table[0], 'flow', Fun_NameConvert_flow(r[4]))
 
         if portid is None or speed_duplex is None or flow is None:
+            # print(r)
+            # print('portid:', portid)
+            # print('speed_duplex:', speed_duplex)
+            # print('flow:', flow)
             return '代码需要适配'
 
         data = {
