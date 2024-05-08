@@ -58,7 +58,8 @@ def Fun_NameConvert_speed_duplex(name, SystemInfo):
     elif (name == '自动'):
         for row in SystemInfo:
             if row[0].strip() == '硬件型号' and \
-                    row[1].strip() == 'SR_8808MNB_8G_WEB_SMART_SWITCH':
+                    (row[1].strip() == 'SR_8808MNB_8G_WEB_SMART_SWITCH' or
+                     row[1].strip() == '8口千兆简单管理交换机'):
                 return name
         return 'Auto'
     elif (name == '10 Half'):
