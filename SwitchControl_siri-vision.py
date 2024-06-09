@@ -19,8 +19,8 @@ MyHelp = 'Usage:\n\
     参数2: User\n\
     参数3: Password\n\
     参数4: ShowSystemInfo, PortStatistics, Reboot, Save, ShowAllPort, ShowPortState, SetPortState\n\
-    参数5(结合参数4，某些方法不实用。): PortNumber(1,2,3,....)\n\
-    参数6(结合参数4，某些方法不实用。): State(0,1)'
+    参数5(结合参数4，某些方法不适用。): PortNumber(1,2,3,....)\n\
+    参数6(结合参数4，某些方法不适用。): State(0,1)'
 
 
 def Fun_GetItem(IP, User, Password, i):
