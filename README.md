@@ -32,3 +32,4 @@
 
 
 目前对SR_8808MNB_8G（千兆版）、及2.5G交换机型号进行过测试。
+推荐淘宝店铺：https://xiliweishi.tmall.com/
